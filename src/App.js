@@ -9,6 +9,7 @@ import WatchedList from "./watched/WatchedList";
 import ListBox from "./layouts/ListBox";
 import Loader from "./common/Loader";
 import ErrorMessage from "./common/ErrorMessage";
+import MovieDetails from "./movies/MovieDetails";
 
 const tempMovieData = [
   {
@@ -61,15 +62,24 @@ export default function App() {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
 
-  const KEY = "8a67d1c2";
+  function handleSelectedId(id) {
+    setSelectedId(selectedId === id ? null : id);
+  }
+
+  function closeMovieDetails() {
+    setSelectedId(null);
+  }
 
   useEffect(() => {
     async function fetchMovies() {
       try {
+        setError("");
         setIsLoading(true);
+
         const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+          `http://www.omdbapi.com/?apikey=${process.env.REACT_APP_API_KEY}&s=${query}`,
         );
 
         if (!res.ok) {
@@ -82,7 +92,6 @@ export default function App() {
           throw new Error(data.Error);
         }
 
-        setError("");
         setMovies(data.Search);
       } catch (err) {
         console.error(err);
@@ -110,12 +119,23 @@ export default function App() {
       <Main>
         <ListBox>
           {isLoading ? <Loader /> : null}
-          {!isLoading && !error && <MovieList movies={movies} />}
+          {!isLoading && !error && (
+            <MovieList movies={movies} onChangeSelectedId={handleSelectedId} />
+          )}
           {error ? <ErrorMessage message={error} /> : null}
         </ListBox>
         <ListBox>
-          <WatchedSummary watched={watched} />
-          <WatchedList watched={watched} />
+          {selectedId ? (
+            <MovieDetails
+              selectedId={selectedId}
+              onBackHandle={closeMovieDetails}
+            />
+          ) : (
+            <>
+              <WatchedSummary watched={watched} />
+              <WatchedList watched={watched} />
+            </>
+          )}
         </ListBox>
       </Main>
     </>
