@@ -3,10 +3,17 @@ import Loader from "../common/Loader";
 import ErrorMessage from "../common/ErrorMessage";
 import StarRating from "../common/StarRating";
 
-export default function MovieDetails({ selectedId, onBackHandle }) {
+export default function MovieDetails({
+  selectedId,
+  watched,
+  rating,
+  onBackHandle,
+  onAddMovie,
+}) {
   const [movieDetails, setMovieDetails] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [userRating, setUserRating] = useState("");
 
   useEffect(() => {
     async function fetchMovieDetails() {
@@ -60,7 +67,30 @@ export default function MovieDetails({ selectedId, onBackHandle }) {
           </header>
           <section>
             <div className="rating">
-              <StarRating size="24" maxRating={10} />
+              {watched.find((item) => item.imdbID === selectedId) ? (
+                <p>
+                  You rated this movie with {rating}
+                  <span>⭐</span>
+                </p>
+              ) : (
+                <>
+                  <StarRating
+                    size="24"
+                    maxRating={10}
+                    onSetRating={setUserRating}
+                  />
+                  {userRating && (
+                    <button
+                      className="btn-add"
+                      onClick={() =>
+                        onAddMovie({ ...movieDetails, userRating })
+                      }
+                    >
+                      + Add to list
+                    </button>
+                  )}
+                </>
+              )}
             </div>
             <p>
               <em>{movieDetails.Plot}</em>
