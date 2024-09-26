@@ -9,6 +9,7 @@ export default function MovieDetails({
   rating,
   onBackHandle,
   onAddMovie,
+  onCloseMovieDetails,
 }) {
   const [movieDetails, setMovieDetails] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +44,30 @@ export default function MovieDetails({
     }
     fetchMovieDetails();
   }, [selectedId]);
+
+  useEffect(() => {
+    if (!movieDetails.Title) return;
+    document.title = `Movie | ${movieDetails.Title}`;
+
+    return function () {
+      document.title = "usePopcorn";
+    };
+  }, [movieDetails]);
+
+  useEffect(() => {
+    const callback = (e) => {
+      if (e.code === "Escape") {
+        onCloseMovieDetails();
+      }
+    };
+
+    document.addEventListener("keydown", callback);
+
+    return function () {
+      document.removeEventListener("keydown", callback);
+    };
+  }, [onCloseMovieDetails]);
+
   return (
     <div className="details">
       {isLoading ? <Loader /> : null}
