@@ -14,7 +14,10 @@ import MovieDetails from "./movies/MovieDetails";
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(() => {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue) || [];
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
@@ -33,7 +36,7 @@ export default function App() {
       imdbRating: Number(movie.imdbRating) || 0,
       runtime: Number(movie.Runtime.split(" ")[0]),
     };
-    console.log(movie);
+
     setWatched([...watched, newMovie]);
 
     closeMovieDetails();
@@ -42,6 +45,10 @@ export default function App() {
   function handleDeleteMovie(id) {
     setWatched(watched.filter((item) => item.imdbID !== id));
   }
+
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watched));
+  }, [watched]);
 
   useEffect(() => {
     const controller = new AbortController();
